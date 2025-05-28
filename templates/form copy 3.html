@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fee Payment System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <h1>School/College Fee Payment System</h1>
+
+    <br><br>
+    <p style="color:red;">⚠️ Save Configuration first to continue.</p>
+    <button onclick="window.location.href='/config'">⚙️ Save Configuration</button>
+
+    <p>Click below to make a fee payment</p>
+    {% if session.get('sheet_name') and session.get('twilio_sid') and session.get('twilio_token') and session.get('twilio_number') %}
+        <button onclick="showForm()">Pay Fees</button>
+    {% else %}
+        <button disabled title="⚠️ Please save configuration first in settings">Pay Fees</button>
+        <p style="color:red;">⚠️ Save Configuration first to continue.</p>
+    {% endif %}
+
+
+    <!-- Dashboard Link -->
+    <br><br>
+    <button onclick="window.open('https://public.tableau.com/views/TableauTrySchoolfee/Sheet1?:language=en-US&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link', '_blank')">View Dashboard</button>
+
+    <!-- Popup Form -->
+    <div id="popupForm" class="popup-form">
+        <div class="form-box">
+            <span class="close-btn" onclick="hideForm()">&times;</span>
+
+            <h2>Fee Payment Form</h2>
+            <form method="POST" action="/" enctype="multipart/form-data">
+                
+                <label>Student ID:</label>
+                <input type="text" name="student_id" required>
+
+                <label>Student Name:</label>
+                <input type="text" name="student_name" required>
+
+                <label>Gender:</label>
+                <select name="gender" required>
+                    <option value="">--Select--</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Others">Others</option>
+                </select>
+
+                <label>Standard:</label>
+                <select name="standard" required>
+                    <option value="">-- Select Standard --</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                </select>
+                
+
+                <label>Division:</label>
+                <select name="division" required>
+                    <option value="">-- Select Division --</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="Arts">Arts</option>
+                    <option value="Commerce">Commerce</option>
+                    <option value="Science">Science</option>
+                </select>
+
+
+                <label>Parent's Mobile No.:</label>
+                <input type="text" name="parent_mobile" pattern="[0-9]{10}" required title="Enter 10 digit mobile number">
+
+                <label>Parent Email ID:</label>
+                <input type="email" name="parent_email" required>
+
+                <label>Fee Payable:</label>
+                <input type="number" name="fee_payable" readonly required>
+
+                <label>Payment Date:</label>
+                <input type="date" name="payment_date" required>
+
+                <label>Payment Mode:</label>
+                <select name="payment_mode" required>
+                    <option value="">-- Select Mode --</option>
+                    <option value="Cash">Cash</option>
+                    <option value="Online">Online</option>
+                    <option value="UPI">UPI</option>
+                    <option value="Cheque">Cheque</option>
+                    <option value="Net Banking">Net Banking</option>
+                </select>
+
+                <label>Transaction ID:</label>
+                <input type="text" name="transaction_id" id="transaction_id" required>
+
+                <label>Fees per Installment:</label>
+                <input type="number" name="fees_per_installment"  readonly required>
+
+                <label>Amount Paid:</label>
+                <input type="number" name="amount_paid" required>
+
+                <label>Remaining Balance:</label>
+                <input type="number" name="remaining_balance" readonly required>
+
+                <label>Category:</label>
+                <select name="category" required>
+                    <option value="">-- Select Category --</option>
+                    <option value="General">General</option>
+                    <option value="OBC">OBC</option>
+                    <option value="ST">ST</option>
+                    <option value="SC">SC</option>
+                </select>
+
+                <label>Due Date:</label>
+                <input type="date" name="due_date" value="2026-03-31" readonly required>
+
+                <label>Installment:</label>
+                <select name="installment" required>
+                    <option value="">-- Select Installment --</option>
+                    <option value="1">1st</option>
+                    <option value="2">2nd</option>
+                    <option value="3">3rd</option>
+                    <option value="4">4th</option>
+                </select>
+
+                <label>Fees Status:</label>
+                <select name="fees_status" id="fees_status" readonly required>
+                    <option value="Unpaid" selected>Unpaid</option>
+                </select>
+
+                <label>Remarks:</label>
+                <textarea name="remarks"></textarea>
+
+                <br><br>
+                <button type="submit" class="btn-submit">Submit Payment</button>
+                <button type="reset" class="btn-clear">Clear Form</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function showForm() {
+            document.getElementById('popupForm').style.display = 'block';
+        }
+
+        function hideForm() {
+            document.getElementById('popupForm').style.display = 'none';
+        }
+
+        // Confirm before clearing
+        document.addEventListener("DOMContentLoaded", function() {
+            const clearButton = document.querySelector("button[type='reset']");
+            clearButton.addEventListener("click", function(e) {
+                if (!confirm("Are you sure you want to clear the form?")) {
+                    e.preventDefault();
+                }
+            });
+        });
+
+        window.onclick = function(event) {
+            let popup = document.getElementById('popupForm');
+            if (event.target == popup) {
+                popup.style.display = "none";
+            }
+        }
+
+        const feeChart = {
+        "1": 10000,
+        "2": 12000,
+        "3": 15000,
+        "4": 18000,
+        "5": 20000,
+        "6": 22000,
+        "7": 25000,
+        "8": 28000,
+        "9": 30000,
+        "10": 35000,
+        "11": 40000,
+        "12": 45000
+    };
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const standardField = document.querySelector('select[name="standard"]');
+        const feePayableField = document.querySelector('input[name="fee_payable"]');
+        const installmentField = document.querySelector('input[name="fees_per_installment"]');
+        const amountPaidField = document.querySelector('input[name="amount_paid"]');
+        const remainingField = document.querySelector('input[name="remaining_balance"]');
+        const installmentSelect = document.querySelector('select[name="installment"]');
+        const feeStatusField = document.querySelector('select[name="fees_status"]');
+        const paymentModeSelect = document.querySelector('select[name="payment_mode"]');
+        const transactionIdField = document.getElementById("transaction_id");
+
+        // Auto-fill Fee Payable on Standard selection
+        standardField.addEventListener('change', function () {
+            const std = this.value;
+            const fee = feeChart[std];
+            if (fee) {
+                feePayableField.value = fee;
+                installmentField.value = (fee / 4).toFixed(2);  // 1/4th of Fee Payable
+                amountPaidField.value = '';
+                remainingField.value = '';
+            } else {
+                feePayableField.value = '';
+                installmentField.value = '';
+                remainingField.value = '';
+            }
+        });
+
+        // Auto-calculate Remaining Balance
+        amountPaidField.addEventListener('input', function () {
+            const fee = parseFloat(feePayableField.value) || 0;
+            const paid = parseFloat(amountPaidField.value) || 0;
+            const remaining = fee - paid;
+            remainingField.value = remaining >= 0 ? remaining : 0;
+        });
+        installmentSelect.addEventListener("change", function () {
+            if (this.value === "4") {
+                feeStatusField.innerHTML = '<option value="Paid" selected>Paid</option>';
+            } else {
+            feeStatusField.innerHTML = '<option value="Unpaid" selected>Unpaid</option>';
+            }
+        });
+        paymentModeSelect.addEventListener("change", function () {
+            const mode = this.value;
+
+            if (mode === "Cash") {
+                transactionIdField.value = "N/A";
+                transactionIdField.readOnly = true;
+            } else if (mode === "Cheque") {
+                transactionIdField.value = "";
+                transactionIdField.placeholder = "Enter Cheque Number";
+                transactionIdField.readOnly = false;
+            } else {
+                transactionIdField.value = "";
+                transactionIdField.placeholder = "Enter Transaction ID";
+                transactionIdField.readOnly = false;
+            }
+        });
+    });
+    </script>
+
+</body>
+</html>

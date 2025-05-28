@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Save Configuration</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <!-- ✅ Buttons Section -->
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert">{{ messages[0] }}</div>
+            {% endif %}
+        {% endwith %}
+
+        <h1>School/College Fee Payment System</h1>
+
+        <button class="btn btn-config" onclick="showConfigForm()">⚙️ Save Configuration</button>
+        <p>Click below to make a fee payment</p>
+        <a href="/" class="btn">Pay Fees</a>
+        <a href="/dashboard" class="btn">View Dashboard</a>
+    </div>
+
+    <!-- ✅ Configuration Popup Modal -->
+    <div id="configPopup" class="popup-form">
+        <div class="form-box">
+            <span class="close-btn" onclick="hideConfigForm()">&times;</span>
+            <h2><i class="fas fa-cogs"></i> Save Configuration (Temporary)</h2>
+
+            <form method="POST" action="/config" enctype="multipart/form-data">
+                <label>Google Sheet Name:</label>
+                <input type="text" name="sheet_name" required>
+
+                <label>Upload credentials.json:</label>
+                <input type="file" name="creds_file" accept=".json" required>
+
+                <label>Twilio SID:</label>
+                <input type="text" name="twilio_sid" required>
+
+                <label>Twilio Token:</label>
+                <input type="password" name="twilio_token" required>
+
+                <label>Twilio WhatsApp Number:</label>
+                <input type="text" name="twilio_number" placeholder="whatsapp:+91..." required>
+
+                <button type="submit" class="btn-submit">💾 Save Configuration</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ✅ Popup Script -->
+    <script>
+        function showConfigForm() {
+            document.getElementById("configPopup").style.display = "flex";
+        }
+
+        function hideConfigForm() {
+            document.getElementById("configPopup").style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            const popup = document.getElementById("configPopup");
+            if (event.target === popup) {
+                popup.style.display = "none";
+            }
+        };
+    </script>
+
+</body>
+</html>
